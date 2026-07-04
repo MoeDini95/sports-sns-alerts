@@ -1,0 +1,186 @@
+import requests
+
+def get_manchester_city_game():
+    url = "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard"
+    response = requests.get(url)
+    data = response.json()
+
+    for event in data["events"]:
+        competitions_list = event["competitions"]
+        first_competition = competitions_list[0]
+        competitors = first_competition["competitors"]
+        one_team = competitors[0]
+        team_info_1 = one_team["team"]
+        team_name_1 = team_info_1["displayName"]
+
+        second_team = competitors[1]
+        team_info_2 = second_team["team"]
+        team_name_2 = team_info_2["displayName"]
+
+        if team_name_1 == "Manchester City" or team_name_2 == "Manchester City":
+            game_id = event["id"]
+            status = event["status"]["type"]["description"]
+            #start_date = event["date"]
+            start_date = first_competition["startDate"]
+            print(team_name_1)
+            print(team_name_2)
+            print(game_id)
+            print(status)
+            print(start_date)
+            return game_id
+        
+    print("No Man City game today")
+    return None
+          
+
+        
+def get_match_details(game_id):
+    url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event={game_id}"
+    response = requests.get(url)
+    data = response.json()
+    #print(data.keys())
+    print(f"found match: {game_id}")
+
+
+    header = data["header"]
+    competitions_list = header["competitions"]
+    first_competition = competitions_list[0]
+    competitors = first_competition["competitors"]
+
+
+    one_team = competitors[0]
+    team_name_1 = one_team["team"]["displayName"]
+    score_1 = one_team["score"]
+
+    second_team = competitors[1]
+    team_name_2 = second_team["team"]["displayName"]
+    score_2 = second_team["score"]
+
+
+    print (team_name_1, score_1)
+    print (team_name_2, score_2)
+    
+    for goal_event in data["keyEvents"]:
+        if goal_event["scoringPlay"] == True:
+            short_text = goal_event["shortText"]
+            clock = goal_event["clock"] ["displayValue"]
+            team = goal_event["team"]["displayName"]
+            print (f"{clock} - {short_text} ({team})")
+        
+         
+found_game_id = get_manchester_city_game()
+if found_game_id is None:
+    print ("No Match information today. Man City is not playing")
+    
+else:
+    get_match_details(found_game_id)
+
+
+
+
+
+#################### Raptors Data ####################
+
+def get_toronto_raptors_game():
+    url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard" 
+    response = requests.get(url)
+    data = response.json()
+
+    for event in data["events"]:
+        competitions_list = event["competitions"]
+        first_competition = competitions_list[0]
+        competitors = first_competition["competitors"]
+        one_team = competitors[0]
+        team_info_1 = one_team["team"]
+        team_name_1 = team_info_1["displayName"]
+
+        second_team = competitors[1]
+        team_info_2 = second_team["team"]
+        team_name_2 = team_info_2["displayName"]
+
+        if team_name_1 == "Toronto Raptors" or team_name_2 == "Toronto Raptors":
+            game_id = event["id"]
+            status = event["status"]["type"]["description"]
+            #start_date = event["date"]
+            start_date = first_competition["startDate"]
+            print(team_name_1)
+            print(team_name_2)
+            print(game_id)
+            print(status)
+            print(start_date)
+            return game_id
+        
+    print("No Raps game today")
+    return None
+
+
+def get_nba_match_details(game_id):
+    url = f"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event={game_id}"
+    response = requests.get(url)
+    data = response.json()
+    #print(data.keys())
+    print(f"found raptors match: {game_id}")
+
+
+    header = data["header"]
+    nba_comp_list = header["competitions"]
+    first_competition = nba_comp_list[0]
+    competitors = first_competition["competitors"]
+
+    first_team = competitors[0]
+    nba_team_1 = first_team["team"]["displayName"]
+    final_score = first_team["score"]
+
+
+    second_team = competitors[1]
+    nba_team_2 = second_team["team"]["displayName"]
+    final_score_2 = second_team["score"]
+
+
+
+
+    print(nba_team_1, final_score)
+    print(nba_team_2, final_score_2)    
+
+
+    leaders = data["leaders"] #top level data 
+    team_leaders = leaders[0] #first team
+    combined_stats = team_leaders["leaders"]
+    points_stats = combined_stats[0]
+    top_scorers = points_stats["leaders"]
+    top_scorer = top_scorers[0]
+    player_name = top_scorer["athlete"]["displayName"]
+    player_stats = top_scorer["displayValue"]
+
+
+    assists_stats = combined_stats[1]
+    top_assists = assists_stats["leaders"]
+
+    rebounds_stats = combined_stats[2]
+    top_rebounds = rebounds_stats["leaders"]
+    
+    top_assister = top_assists[0]
+    assist_player = top_assister["athlete"]["displayName"]
+    assist_stats = top_assister ["displayValue"]
+
+    top_rebounder = top_rebounds[0]
+    rebound_player = top_rebounder["athlete"]["displayName"]
+    rebound_stats = top_rebounder["displayValue"]
+
+    
+    
+    
+    print (f"Top Stats:{player_name} - {player_stats} pts | {assist_player} - {assist_stats} ast | {rebound_player} - {rebound_stats} reb")
+    
+
+    
+
+
+found_raptors_id = get_toronto_raptors_game()
+if found_raptors_id is None:
+    print ("No Match information today. Raptors are not playing")
+    
+    
+else:
+    get_nba_match_details(found_raptors_id)
+
