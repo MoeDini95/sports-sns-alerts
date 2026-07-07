@@ -1,4 +1,4 @@
-# Sports Alerts AWS Project — Conversation Summary for Claude Code
+# Sports Alerts AWS Project 
 
 ## Project Overview
 
@@ -20,7 +20,7 @@ No data stored on phone — all backend via AWS.
 | Monitoring | AWS CloudWatch |
 | IaC | Terraform |
 | CI/CD | GitHub Actions |
-| AI Summaries | Claude API or Amazon Bedrock (Phase 7) |
+| AI Summaries | Amazon Bedrock (Phase 7) |
 | Secrets | AWS Secrets Manager (Phase 7) |
 
 ---
@@ -167,7 +167,7 @@ Lambda code is zipped and deployed via Terraform's `aws_lambda_function` resourc
 | EventBridge | $0 (within free tier) |
 | SNS SMS (Canada) | ~$0.19–$0.77 |
 | CloudWatch | $0 (within free tier) |
-| Claude API (Phase 7) | ~$0.01–$0.05 (minimal at personal scale) |
+| Bedrock (Phase 7) | ~$0.01–$0.05 (minimal at personal scale) |
 | **Total (Phases 1-6)** | **~$0–$1/month** |
 | **Total (with Phase 7)** | **~$0–$2/month** |
 
@@ -202,7 +202,7 @@ Lambda code is zipped and deployed via Terraform's `aws_lambda_function` resourc
 - Automated test → plan → apply pipeline
 
 ### Phase 7 — AI-Generated Summaries (NEW)
-- Call Claude API (or Amazon Bedrock) from inside Lambda
+- Call Amazon Bedrock from inside Lambda
 - Pass structured match data (scores, scorers, stats) as input
 - Receive natural language summary for SMS alert
 - Example output: "Barrett led Toronto with a strong all-around game, dropping 21 and dishing 7 assists as the Raptors pulled away in the second half."
