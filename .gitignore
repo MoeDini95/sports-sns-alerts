@@ -7,3 +7,5 @@ __pycache__/
 .terraform/
 terraform.tfvars
 *.tfvars
+Backend/package/
+Backend/sports_alerts.zip
