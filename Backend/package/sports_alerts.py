@@ -23,6 +23,11 @@ def get_manchester_city_game():
         if team_name_1 == "Manchester City" or team_name_2 == "Manchester City":
             game_id = event["id"]
             status = event["status"]["type"]["description"]
+
+            if status in ["Scheduled", "Postponed", "Canceled"]:
+                print(f"Man City game found but status is {status} - skipping")
+                return None
+
             #start_date = event["date"]
             start_date = first_competition["startDate"]
             print(team_name_1)
@@ -94,6 +99,11 @@ def get_toronto_raptors_game():
         if team_name_1 == "Toronto Raptors" or team_name_2 == "Toronto Raptors":
             game_id = event["id"]
             status = event["status"]["type"]["description"]
+
+            if status in ["Scheduled", "Postponed", "Canceled"]:
+                print(f"Raptors game found but status is {status} - skipping")
+                return None
+
             #start_date = event["date"]
             start_date = first_competition["startDate"]
             print(team_name_1)
@@ -168,12 +178,7 @@ def lambda_handler(event, context):
     sns = boto3.client("sns", region_name="us-east-1")
     SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:259004904941:sports-alerts"
     
-    # SNS test 
-    sns.publish(
-        TopicArn=SNS_TOPIC_ARN,
-        Message="Test alert: Sports Alerts to SMS is now working",
-        Subject= "Sports Alerts"
-    )
+   
 
 
     # Man City 
@@ -186,6 +191,7 @@ def lambda_handler(event, context):
     
     # Raptors 
     found_raptors_id = get_toronto_raptors_game()
+    print(f"Raptors game ID: {found_raptors_id}")
     if found_raptors_id is None:
          print ("No Match information today. Raptors are not playing")
     else:
