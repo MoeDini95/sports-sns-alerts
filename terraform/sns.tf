@@ -4,6 +4,6 @@ resource "aws_sns_topic" "sports_alerts" {
 
 resource "aws_sns_topic_subscription" "sms" {
   topic_arn = aws_sns_topic.sports_alerts.arn
-  protocol = "sms"
-  endpoint = var.phone_number
+  protocol  = "sms"
+  endpoint  = var.phone_number
 }
