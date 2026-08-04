@@ -1,6 +1,6 @@
 import requests
 import boto3
-import json
+
 
 
 def get_manchester_city_game():
@@ -28,14 +28,9 @@ def get_manchester_city_game():
                 print(f"Man City game found but status is {status} - skipping")
                 return None
 
-            #start_date = event["date"]
-            start_date = first_competition["startDate"]
-            print(team_name_1)
-            print(team_name_2)
-            print(game_id)
-            print(status)
-            print(start_date)
-            return game_id
+            
+            print(f"Found match: {team_name_1} vs {team_name_2} | ID: {game_id} | Status: {status}")
+            return game_id  
         
     print("No Man City game today")
     return None
@@ -103,14 +98,8 @@ def get_toronto_raptors_game():
             if status in ["Scheduled", "Postponed", "Canceled"]:
                 print(f"Raptors game found but status is {status} - skipping")
                 return None
-
-            #start_date = event["date"]
-            start_date = first_competition["startDate"]
-            print(team_name_1)
-            print(team_name_2)
-            print(game_id)
-            print(status)
-            print(start_date)
+            
+            print(f"Found match: {team_name_1} vs {team_name_2} | ID: {game_id} | Status: {status}")
             return game_id
         
     print("No Raps game today")
@@ -172,6 +161,31 @@ def get_nba_match_details(game_id):
     message +=  (f"Top Stats:{player_name} - {player_stats} pts | {assist_player} - {assist_stats} ast | {rebound_player} - {rebound_stats} reb")
     return message
 
+
+def check_and_update_state(team_id, current_score, match_id):
+    # Connection to DynamoDB
+    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    # Selecting table 
+    table = dynamodb.Table('sports_alerts_table')
+    response = table.get_item(Key={"team_id": team_id})
+
+    item = response.get("Item", {})
+    last_score =  item.get("last_score", None)
+    
+
+    if last_score == current_score:
+        return False
+    table.put_item(
+       Item={
+           "team_id": team_id,
+           "last_score": current_score,
+           "match_id": match_id
+       }
+   )
+
+    return True
+
+
     
 
 def lambda_handler(event, context):
@@ -182,22 +196,25 @@ def lambda_handler(event, context):
 
 
     # Man City 
-    found_game_id = get_manchester_city_game()
-    if found_game_id is None:
+    found_mancity_id = get_manchester_city_game()
+    if found_mancity_id is None:
         print ("No Match information today. Man City is not playing")
     else:
-        message = get_match_details(found_game_id)
-        sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message)
+        message = get_match_details(found_mancity_id)
+        if check_and_update_state("manchester-city", message, found_mancity_id):
+            sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message)
     
     # Raptors 
     found_raptors_id = get_toronto_raptors_game()
-    print(f"Raptors game ID: {found_raptors_id}")
+    #print(f"Raptors game ID: {found_raptors_id}")
     if found_raptors_id is None:
          print ("No Match information today. Raptors are not playing")
     else:
         message = get_nba_match_details(found_raptors_id)
-        sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message)
+        if check_and_update_state("toronto-raptors", message, found_raptors_id):
+            sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message)
 
     return {"statusCode": 200, "body": "Done"}
 
-   
+if __name__ == "__main__":
+    lambda_handler(None, None)
