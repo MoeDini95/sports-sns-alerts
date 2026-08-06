@@ -32,10 +32,8 @@ jobs:
         working-directory: terraform
       
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -var="phone_number=${{ secrets.TF_VAR_PHONE_NUMBER }}"
         working-directory: terraform
-        env: 
-          TF_VAR_phone_number: ${{ secrets.TF_VAR_PHONE_NUMBER }}
 
       - name: Deploy Lambda 
         run: |
