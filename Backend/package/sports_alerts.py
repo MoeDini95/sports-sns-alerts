@@ -1,6 +1,8 @@
 import requests
 import boto3
 
+AI_SUMMARIES_ENABLED = True
+
 
 
 def get_manchester_city_game():
@@ -202,7 +204,12 @@ def lambda_handler(event, context):
     else:
         message = get_match_details(found_mancity_id)
         if check_and_update_state("manchester-city", message, found_mancity_id):
+            if AI_SUMMARIES_ENABLED: 
+                message = get_ai_summary(message)
             sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message)
+       
+    
+    
     
     # Raptors 
     found_raptors_id = get_toronto_raptors_game()
@@ -212,9 +219,35 @@ def lambda_handler(event, context):
     else:
         message = get_nba_match_details(found_raptors_id)
         if check_and_update_state("toronto-raptors", message, found_raptors_id):
+            if AI_SUMMARIES_ENABLED: 
+                message = get_ai_summary(message)
             sns.publish(TopicArn=SNS_TOPIC_ARN, Message=message)
 
     return {"statusCode": 200, "body": "Done"}
 
 if __name__ == "__main__":
     lambda_handler(None, None)
+
+def get_ai_summary(match_data):
+    bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+    model_id = "anthropic.claude-haiku-4-5-20251001-v1:0"
+
+    body = {
+         "max_tokens": 200,
+         "messages": [
+            {
+                 "role": "user",
+                 "content": f"Here is the match data:\n{match_data}\n\nWrite a short 2-3 sentence SMS summary of this match."
+            }
+        ],
+        "anthropic_version": "bedrock-2023-05-31"
+    }
+
+    response = bedrock.invoke_model(
+        body=json.dumps(body),
+        modelId=model_id,
+    )
+    response_body = json.loads(response["body"].read())
+    summary = response_body["content"][0]["text"]
+    return summary
+                                        
