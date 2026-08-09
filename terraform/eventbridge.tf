@@ -1,7 +1,7 @@
 resource "aws_cloudwatch_event_rule" "epl_schedule" {
   name                = "epl-game-schedule"
   description         = "Triggers Lambda function during EPL games"
-  schedule_expression = "cron(*/5 12-22 * 1-5,8-12 ? *)"
+  schedule_expression = "cron(*/5 11-22 * 1-5,8-12 ? *)"
 
 }
 
