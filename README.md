@@ -1,6 +1,6 @@
 # Sports Alerts AWS Pipeline
 
-A fully serverless, AI-powered sports alert system that automatically sends natural language SMS notifications for live EPL and NBA scores, goal scorers, and player stats — directly to your phone with no data stored on device.
+A fully serverless, AI-powered sports alert system built on AWS that delivers natural language SMS notifications for live Manchester City (EPL) and Toronto Raptors (NBA) scores, goal scorers, and player stats — with zero data stored on device.
 
 ---
 
