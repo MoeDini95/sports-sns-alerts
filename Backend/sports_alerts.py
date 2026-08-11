@@ -1,5 +1,6 @@
 import requests
 import boto3
+import json
 
 AI_SUMMARIES_ENABLED = True
 
@@ -187,6 +188,29 @@ def check_and_update_state(team_id, current_score, match_id):
 
     return True
 
+def get_ai_summary(match_data):
+    bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+    model_id = "anthropic.claude-haiku-4-5-20251001-v1:0"
+
+    body = {
+         "max_tokens": 200,
+         "messages": [
+            {
+                 "role": "user",
+                 "content": f"Here is the match data:\n{match_data}\n\nWrite a short 2-3 sentence SMS summary of this match."
+            }
+        ],
+        "anthropic_version": "bedrock-2023-05-31"
+    }
+
+    response = bedrock.invoke_model(
+        body=json.dumps(body),
+        modelId=model_id,
+    )
+    response_body = json.loads(response["body"].read())
+    summary = response_body["content"][0]["text"]
+    return summary
+
 
     
 
@@ -227,27 +251,3 @@ def lambda_handler(event, context):
 
 if __name__ == "__main__":
     lambda_handler(None, None)
-
-def get_ai_summary(match_data):
-    bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
-    model_id = "anthropic.claude-haiku-4-5-20251001-v1:0"
-
-    body = {
-         "max_tokens": 200,
-         "messages": [
-            {
-                 "role": "user",
-                 "content": f"Here is the match data:\n{match_data}\n\nWrite a short 2-3 sentence SMS summary of this match."
-            }
-        ],
-        "anthropic_version": "bedrock-2023-05-31"
-    }
-
-    response = bedrock.invoke_model(
-        body=json.dumps(body),
-        modelId=model_id,
-    )
-    response_body = json.loads(response["body"].read())
-    summary = response_body["content"][0]["text"]
-    return summary
-                                        
